@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Guide Highlight Tool",
-  "version": "6.3.1",
-  "description": "Fixed full version: crop first, badges second, no effects until badge exists, batch export, naming, drag/resize.",
+  "name": "StepShot",
+  "version": "6.4.0",
+  "description": "Screenshot annotation tool for creating step-by-step guide images. Crop, badge, highlight, export.",
   "permissions": [
     "activeTab",
     "scripting",
@@ -18,7 +18,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Guide Highlight Tool"
+    "default_title": "StepShot"
   },
   "commands": {
     "start-capture": {

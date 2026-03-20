@@ -2,12 +2,12 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
-  <title>Guide Highlight Editor V6.3.1</title>
+  <title>StepShot Editor v6.4.0</title>
   <link rel="stylesheet" href="editor.css" />
 </head>
 <body>
   <aside class="sidebar">
-    <h1>Guide Highlight Editor</h1>
+    <h1>StepShot <span style="font-size:0.55em;font-weight:400;opacity:0.55;vertical-align:middle">v6.4.0</span></h1>
 
     <label class="field">
       <span>Preset module</span>
@@ -55,7 +55,14 @@
 
     <div class="checks">
       <label><input id="showArrow" type="checkbox" /> Hiện mũi tên</label>
+      <label><input id="showBadgeNumbers" type="checkbox" checked /> Hiện số badge</label>
       <label><input id="showAllBadges" type="checkbox" checked /> Preview tất cả badge</label>
+      <label style="display:flex;align-items:center;gap:6px">
+        <span>Màu highlight</span>
+        <input id="highlightColor" type="color" value="#10B981"
+               title="Màu badge, viền highlight, mũi tên"
+               style="width:36px;height:24px;padding:1px;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer" />
+      </label>
     </div>
 
     <div class="toolbar">

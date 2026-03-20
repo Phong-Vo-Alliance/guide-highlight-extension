@@ -76,7 +76,36 @@
     badgeEls.forEach((badge, idx) => badge.textContent = String(idx + 1));
   }
 
+  // Detect the most meaningful interactive element at CSS point (x, y).
+  // Hides the overlay temporarily so elementFromPoint sees through to the page.
+  function getHighlightForPoint(x, y) {
+    // Temporarily remove overlay from layout — our z-index overlay would block
+    // the hit test otherwise, returning our own DOM nodes instead of page elements.
+    root.style.display = "none";
+    let el = document.elementFromPoint(x, y);
+    root.style.display = "";   // restore (removes inline style → reverts to block)
+
+    if (!el || el === document.body || el === document.documentElement) return null;
+
+    // Walk up max 6 levels to find a recognisable interactive / semantic element
+    const INTERACTIVE = ["INPUT", "BUTTON", "SELECT", "TEXTAREA", "A", "LABEL",
+                         "LI", "TD", "TH", "SUMMARY"];
+    let cur = el;
+    for (let i = 0; i < 6; i++) {
+      if (!cur || cur === document.body) break;
+      if (INTERACTIVE.includes(cur.tagName)) { el = cur; break; }
+      cur = cur.parentElement;
+    }
+
+    const r = el.getBoundingClientRect();
+    if (r.width < 8 || r.height < 8) return null;
+    return { left: r.left, top: r.top, width: r.width, height: r.height };
+  }
+
   function addBadge(x, y) {
+    // Auto-detect the page element at click point for per-badge highlight rect
+    const highlight = getHighlightForPoint(x, y);
+
     const badge = document.createElement("div");
     badge.style.position = "absolute";
     badge.style.left = (x - 15) + "px";
@@ -93,7 +122,7 @@
     badge.style.fontSize = "14px";
     badge.style.boxShadow = "0 4px 12px rgba(0,0,0,0.18)";
     root.appendChild(badge);
-    badgesCss.push({ x, y });
+    badgesCss.push({ x, y, highlight });
     badgeEls.push(badge);
     renumberBadges();
     hud.textContent = `Bước 2: click để đánh số. Đã có ${badgesCss.length} điểm. Backspace hoặc Delete để xóa số cuối. Enter để mở editor.`;
@@ -118,13 +147,27 @@
 
   async function confirm() {
     if (!cropRectCss) return;
+
+    // STEP 1 — hide the entire overlay BEFORE capturing.
+    // captureVisibleTab() runs as soon as the message is received by
+    // background.js, so the DOM must be visually gone first.
+    root.style.visibility = "hidden";
+
+    // STEP 2 — wait for the browser to fully repaint (two rAF = one full
+    // composited frame, enough for Chrome's screenshot pipeline).
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    // STEP 3 — now capture: the overlay is invisible, screenshot is clean.
     const res = await chrome.runtime.sendMessage({
       type: "SELECTION_DONE",
       cropRectCss,
       badgesCss,
       devicePixelRatio: window.devicePixelRatio || 1
     });
+
     if (!res?.ok) alert("Không thể chụp ảnh. Vui lòng thử lại.");
+
+    // STEP 4 — remove overlay from DOM now that capture is done.
     cleanup();
   }
 
