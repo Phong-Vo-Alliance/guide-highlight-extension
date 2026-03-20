@@ -92,17 +92,17 @@ function localBadges(settings) {
   return state.badgesPx.map(b => ({ x: b.x - cropX, y: b.y - cropY }));
 }
 
-function drawRoundedRect(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
+function drawRoundedRect(x, y, w, h, r, c = ctx) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
 }
 
-function drawArrow(x, y, rect) {
+function drawArrow(x, y, rect, c = ctx) {
   let startX, startY;
   const distLeft = Math.abs(x - rect.x);
   const distRight = Math.abs((rect.x + rect.w) - x);
@@ -115,53 +115,53 @@ function drawArrow(x, y, rect) {
   else if (minDist === distTop) { startX = x; startY = y - 80; }
   else { startX = x; startY = y + 80; }
 
-  startX = clamp(startX, 20, canvas.width - 20);
-  startY = clamp(startY, 20, canvas.height - 20);
+  startX = clamp(startX, 20, c.canvas.width - 20);
+  startY = clamp(startY, 20, c.canvas.height - 20);
 
-  ctx.save();
-  ctx.strokeStyle = "#10B981";
-  ctx.fillStyle = "#10B981";
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(x, y);
-  ctx.stroke();
+  c.save();
+  c.strokeStyle = "#10B981";
+  c.fillStyle = "#10B981";
+  c.lineWidth = 4;
+  c.lineCap = "round";
+  c.beginPath();
+  c.moveTo(startX, startY);
+  c.lineTo(x, y);
+  c.stroke();
 
   const angle = Math.atan2(y - startY, x - startX);
   const len = 14;
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x - len * Math.cos(angle - Math.PI / 6), y - len * Math.sin(angle - Math.PI / 6));
-  ctx.lineTo(x - len * Math.cos(angle + Math.PI / 6), y - len * Math.sin(angle + Math.PI / 6));
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
+  c.beginPath();
+  c.moveTo(x, y);
+  c.lineTo(x - len * Math.cos(angle - Math.PI / 6), y - len * Math.sin(angle - Math.PI / 6));
+  c.lineTo(x - len * Math.cos(angle + Math.PI / 6), y - len * Math.sin(angle + Math.PI / 6));
+  c.closePath();
+  c.fill();
+  c.restore();
 }
 
-function drawBadge(number, x, y, active = false) {
+function drawBadge(number, x, y, active = false, c = ctx) {
   const radius = 17;
-  ctx.save();
-  ctx.fillStyle = active ? "#0ea5e9" : "#10B981";
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.fill();
+  c.save();
+  c.fillStyle = active ? "#0ea5e9" : "#10B981";
+  c.beginPath();
+  c.arc(x, y, radius, 0, Math.PI * 2);
+  c.fill();
 
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "700 15px Inter, Arial, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(String(number), x, y + 1);
-  ctx.restore();
+  c.fillStyle = "#FFFFFF";
+  c.font = "700 15px Inter, Arial, sans-serif";
+  c.textAlign = "center";
+  c.textBaseline = "middle";
+  c.fillText(String(number), x, y + 1);
+  c.restore();
 }
 
-function drawHandles(x, y, w, h) {
+function drawHandles(x, y, w, h, c = ctx) {
   const size = 12;
   const pts = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
-  ctx.save();
-  ctx.fillStyle = "#10B981";
-  pts.forEach(([px, py]) => ctx.fillRect(px - size / 2, py - size / 2, size, size));
-  ctx.restore();
+  c.save();
+  c.fillStyle = "#10B981";
+  pts.forEach(([px, py]) => c.fillRect(px - size / 2, py - size / 2, size, size));
+  c.restore();
 }
 
 function updateStatus(hasBadge) {
@@ -172,41 +172,31 @@ function updateStatus(hasBadge) {
   statusMeta.textContent = `Đang có ${state.badgesPx.length} badge. Badge đang chọn: ${state.activeBadgeIndex >= 0 ? state.activeBadgeIndex + 1 : "chưa chọn"}.`;
 }
 
-function render(exportBadgeIndex = null) {
-  if (!payload || !image) return;
-  const settings = getSettings();
-  const { cropX, cropY, cropW, cropH } = getCropBox(settings);
-  const rect = localRect(settings);
-  const badges = localBadges(settings);
-  const hasBadge = state.badgesPx.length > 0;
+function renderBaseImage(targetCtx, cropX, cropY, cropW, cropH) {
+  targetCtx.clearRect(0, 0, cropW, cropH);
+  targetCtx.drawImage(image, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+}
 
-  canvas.width = cropW;
-  canvas.height = cropH;
-  canvas.style.transform = `scale(${settings.zoom})`;
+function renderFinalAnnotations(targetCtx, settings, rect, badges, exportBadgeIndex) {
+  const w = targetCtx.canvas.width;
+  const h = targetCtx.canvas.height;
 
-  ctx.clearRect(0, 0, cropW, cropH);
-  ctx.drawImage(image, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  targetCtx.save();
+  targetCtx.fillStyle = `rgba(15, 23, 42, ${settings.blur})`;
+  targetCtx.fillRect(0, 0, w, h);
+  targetCtx.globalCompositeOperation = "destination-out";
+  drawRoundedRect(rect.x, rect.y, rect.w, rect.h, 14, targetCtx);
+  targetCtx.fill();
+  targetCtx.restore();
 
-  if (hasBadge) {
-    ctx.save();
-    ctx.fillStyle = `rgba(15, 23, 42, ${settings.blur})`;
-    ctx.fillRect(0, 0, cropW, cropH);
-    ctx.globalCompositeOperation = "destination-out";
-    drawRoundedRect(rect.x, rect.y, rect.w, rect.h, 14);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.strokeStyle = "#10B981";
-    ctx.fillStyle = "rgba(16, 185, 129, 0.08)";
-    ctx.lineWidth = 3;
-    drawRoundedRect(rect.x, rect.y, rect.w, rect.h, 14);
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  updateStatus(hasBadge);
+  targetCtx.save();
+  targetCtx.strokeStyle = "#10B981";
+  targetCtx.fillStyle = "rgba(16, 185, 129, 0.08)";
+  targetCtx.lineWidth = 3;
+  drawRoundedRect(rect.x, rect.y, rect.w, rect.h, 14, targetCtx);
+  targetCtx.fill();
+  targetCtx.stroke();
+  targetCtx.restore();
 
   let drawIndexes = [];
   if (exportBadgeIndex !== null) {
@@ -220,19 +210,79 @@ function render(exportBadgeIndex = null) {
   drawIndexes.forEach((idx) => {
     const badge = badges[idx];
     if (!badge) return;
-    if (settings.showArrow) drawArrow(badge.x, badge.y, rect);
-    drawBadge(idx + 1, badge.x, badge.y, exportBadgeIndex === null && idx === state.activeBadgeIndex);
+    if (settings.showArrow) drawArrow(badge.x, badge.y, rect, targetCtx);
+    drawBadge(idx + 1, badge.x, badge.y, exportBadgeIndex === null && idx === state.activeBadgeIndex, targetCtx);
+  });
+}
+
+function renderEditorGuides(targetCtx, rect) {
+  targetCtx.save();
+  targetCtx.strokeStyle = "#10B981";
+  targetCtx.lineWidth = 2;
+  drawRoundedRect(rect.x, rect.y, rect.w, rect.h, 14, targetCtx);
+  targetCtx.stroke();
+  targetCtx.restore();
+  drawHandles(rect.x, rect.y, rect.w, rect.h, targetCtx);
+}
+
+function previewRender() {
+  if (!payload || !image) return;
+  const settings = getSettings();
+  const { cropX, cropY, cropW, cropH } = getCropBox(settings);
+  const rect = localRect(settings);
+  const badges = localBadges(settings);
+  const hasBadge = state.badgesPx.length > 0;
+
+  canvas.width = cropW;
+  canvas.height = cropH;
+  canvas.style.transform = `scale(${settings.zoom})`;
+
+  console.debug('[render:preview]', {
+    badgeCount: state.badgesPx.length,
+    isExport: false,
+    showEditorGuides: true,
+    activeBadgeIndex: state.activeBadgeIndex
   });
 
-  if (exportBadgeIndex === null) {
-    ctx.save();
-    ctx.strokeStyle = "#10B981";
-    ctx.lineWidth = 2;
-    drawRoundedRect(rect.x, rect.y, rect.w, rect.h, 14);
-    ctx.stroke();
-    ctx.restore();
-    drawHandles(rect.x, rect.y, rect.w, rect.h);
+  renderBaseImage(ctx, cropX, cropY, cropW, cropH);
+  if (hasBadge) {
+    renderFinalAnnotations(ctx, settings, rect, badges, null);
   }
+  renderEditorGuides(ctx, rect);
+  updateStatus(hasBadge);
+}
+
+function exportRender(exportBadgeIndex = null) {
+  if (!payload || !image) return null;
+  const settings = getSettings();
+  const { cropX, cropY, cropW, cropH } = getCropBox(settings);
+  const rect = localRect(settings);
+  const badges = localBadges(settings);
+  const hasBadge = state.badgesPx.length > 0;
+
+  console.debug('[render:export]', {
+    badgeCount: state.badgesPx.length,
+    isExport: true,
+    showEditorGuides: false,
+    exportBadgeIndex
+  });
+
+  const offscreen = document.createElement("canvas");
+  offscreen.width = cropW;
+  offscreen.height = cropH;
+  const offCtx = offscreen.getContext("2d");
+
+  renderBaseImage(offCtx, cropX, cropY, cropW, cropH);
+  if (hasBadge) {
+    renderFinalAnnotations(offCtx, settings, rect, badges, exportBadgeIndex);
+  }
+
+  const mime = settings.format === "png" ? "image/png" : "image/webp";
+  return offscreen.toDataURL(mime, settings.quality);
+}
+
+function render() {
+  previewRender();
 }
 
 function canvasPoint(evt) {
@@ -307,10 +357,9 @@ function buildFilename(prefix, step, format) {
 async function downloadCurrent(exportBadgeIndex = null, stepOverride = null) {
   const settings = getSettings();
   await persistSettings(settings);
-  render(exportBadgeIndex);
 
-  const mime = settings.format === "png" ? "image/png" : "image/webp";
-  const dataUrl = canvas.toDataURL(mime, settings.quality);
+  const dataUrl = exportRender(exportBadgeIndex);
+  if (!dataUrl) return;
   const step = stepOverride ?? settings.stepNumber;
   const fname = buildFilename(settings.filePrefix, step, settings.format);
 
@@ -320,7 +369,7 @@ async function downloadCurrent(exportBadgeIndex = null, stepOverride = null) {
     saveAs: false
   });
 
-  render();
+  previewRender();
 }
 
 async function exportAllBadges() {
