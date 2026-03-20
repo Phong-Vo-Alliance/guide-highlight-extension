@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Guide Highlight Editor V6.3.1</title>
+  <link rel="stylesheet" href="editor.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>Guide Highlight Editor</h1>
+
+    <label class="field">
+      <span>Preset module</span>
+      <select id="preset">
+        <option value="web">Web</option>
+        <option value="mobile">Mobile</option>
+        <option value="admin">Admin</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Tiền tố tên file</span>
+      <input id="filePrefix" type="text" />
+    </label>
+
+    <div class="grid">
+      <label class="field">
+        <span>Số bước bắt đầu</span>
+        <input id="stepNumber" type="number" min="1" />
+      </label>
+      <label class="field">
+        <span>Padding</span>
+        <input id="padding" type="number" min="0" step="4" />
+      </label>
+      <label class="field">
+        <span>Blur</span>
+        <input id="blur" type="range" min="0" max="0.65" step="0.05" />
+      </label>
+      <label class="field">
+        <span>Zoom preview</span>
+        <input id="zoom" type="range" min="0.5" max="2" step="0.1" value="1" />
+      </label>
+      <label class="field">
+        <span>Định dạng</span>
+        <select id="format">
+          <option value="webp">WebP</option>
+          <option value="png">PNG</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Chất lượng WebP</span>
+        <input id="quality" type="number" min="0.1" max="1" step="0.01" />
+      </label>
+    </div>
+
+    <div class="checks">
+      <label><input id="showArrow" type="checkbox" /> Hiện mũi tên</label>
+      <label><input id="showAllBadges" type="checkbox" checked /> Preview tất cả badge</label>
+    </div>
+
+    <div class="toolbar">
+      <button id="addBadgeBtn" class="ghost">Thêm badge</button>
+      <button id="removeSelectedBadgeBtn" class="ghost danger">Xóa badge đang chọn</button>
+      <button id="removeLastBadgeBtn" class="ghost danger">Xóa badge cuối</button>
+    </div>
+
+    <div class="actions">
+      <button id="saveSingleBtn" class="primary">Lưu ảnh hiện tại</button>
+      <button id="saveAllBtn" class="ghost">Export tất cả badge</button>
+    </div>
+
+    <div class="tips">
+      <strong>Fixed flow:</strong>
+      <ul>
+        <li>Bước 1 chỉ chọn vùng xuất ảnh, không áp dụng hiệu ứng.</li>
+        <li>Hiệu ứng chỉ bắt đầu khi có ít nhất 1 badge.</li>
+        <li>Export tất cả badge: mỗi file chỉ có đúng 1 badge.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="meta" id="pageMeta"></div>
+    <div class="meta" id="statusMeta"></div>
+    <div class="canvas-wrap">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+  </main>
+
+  <script src="editor.js"></script>
+</body>
+</html>

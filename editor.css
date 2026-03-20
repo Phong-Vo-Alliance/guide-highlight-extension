@@ -1,0 +1,21 @@
+
+body { margin: 0; min-height: 100vh; display: grid; grid-template-columns: 390px 1fr; font-family: Inter, Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+.sidebar { background: white; border-right: 1px solid #e2e8f0; padding: 18px; }
+.stage { padding: 18px; overflow: auto; }
+h1 { margin: 0 0 16px; font-size: 20px; }
+.field { display: block; margin-bottom: 12px; }
+.field span { display: block; margin-bottom: 6px; font-size: 12px; color: #475569; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+input[type="text"], input[type="number"], select { width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; background: white; border-radius: 10px; padding: 10px 12px; font: inherit; }
+input[type="range"] { width: 100%; }
+.checks { display: grid; gap: 8px; margin: 10px 0 12px; font-size: 13px; }
+.toolbar, .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+button { border: 0; border-radius: 10px; padding: 10px 12px; font: inherit; cursor: pointer; }
+button.primary { background: #10b981; color: white; flex: 1; }
+button.ghost { background: white; border: 1px solid #cbd5e1; }
+button.danger { color: #b91c1c; }
+.meta { margin-bottom: 8px; font-size: 13px; color: #475569; }
+.canvas-wrap { display: inline-block; background: white; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: auto; max-width: 100%; }
+#previewCanvas { display: block; transform-origin: top left; }
+.tips { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #ecfdf5; color: #065f46; font-size: 13px; }
+.tips ul { margin: 8px 0 0 18px; padding: 0; }

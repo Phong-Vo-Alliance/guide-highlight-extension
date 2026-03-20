@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Guide Highlight Tool</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Guide Highlight Tool</h1>
+
+    <label class="field">
+      <span>Preset module</span>
+      <select id="preset">
+        <option value="web">Web</option>
+        <option value="mobile">Mobile</option>
+        <option value="admin">Admin</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Tiền tố tên file</span>
+      <input id="filePrefix" type="text" placeholder="07-dang-nhap-lan-dau" />
+    </label>
+
+    <div class="grid">
+      <label class="field">
+        <span>Bước bắt đầu</span>
+        <input id="stepNumber" type="number" min="1" />
+      </label>
+      <label class="field">
+        <span>Padding</span>
+        <input id="padding" type="number" min="0" step="4" />
+      </label>
+      <label class="field">
+        <span>Blur</span>
+        <input id="blur" type="range" min="0" max="0.65" step="0.05" />
+      </label>
+      <label class="field">
+        <span>Định dạng</span>
+        <select id="format">
+          <option value="webp">WebP</option>
+          <option value="png">PNG</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="field">
+      <span>Chất lượng WebP</span>
+      <input id="quality" type="number" min="0.1" max="1" step="0.01" />
+    </label>
+
+    <label class="check">
+      <input id="showArrow" type="checkbox" />
+      Hiện mũi tên mặc định
+    </label>
+
+    <div class="actions">
+      <button id="saveBtn" class="ghost">Lưu thiết lập</button>
+      <button id="startBtn" class="primary">Bắt đầu chụp</button>
+    </div>
+
+    <p class="hint">Phím tắt: <strong>Alt + Shift + H</strong></p>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
